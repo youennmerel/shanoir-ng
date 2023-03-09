@@ -42,7 +42,8 @@ jobs:
     - name: Create directory /shanoir-ng-logs
       run: sudo mkdir -m777 /var/log/shanoir-ng-logs
     - name: Build with Maven
-      run: mvn -f ./shanoir-ng-parent/pom.xml install verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=youennmerel:shanoir-ng
+      run: mvn -f ./shanoir-ng-parent/pom.xml install verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=youennmerel:shanoir-ng -Dsonar.pullrequest.key=${{ github.event.number }}
+          -Dsonar.pullrequest.branch=${{ github.HEAD_REF }} -Dsonar.pullrequest.base=${{ github.BASE_REF }} -Dsonar.pullrequest.github.repository=${{ github.repository }}
       env:
         SHANOIR_URL_HOST: localhost
         SHANOIR_URL_SCHEME: http
