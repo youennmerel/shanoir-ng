@@ -69,5 +69,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '[![Quality Gate Status](https://sonarqube.inria.fr/sonarqube/api/project_badges/measure?project=youennmerel%3Ashanoir-ng&metric=alert_status&token=sqb_878a80904ff294fd09d1f93e5013d7102d09a235)](https://sonarqube.inria.fr/sonarqube/dashboard?id=youennmerel%3Ashanoir-ng) Please check [Quality Gate](https://sonarqube.inria.fr/sonarqube/dashboard?id=youennmerel%3Ashanoir-ng&pullRequest=${{ github.event.number }})'
+              body: ':robot: Please check this pull request [quality gate](https://sonarqube.inria.fr/sonarqube/dashboard?id=youennmerel%3Ashanoir-ng&pullRequest=${{ github.event.number }})'
             })
