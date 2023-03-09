@@ -58,6 +58,7 @@ jobs:
     if: github.event_name == 'pull_request'
     needs: build
     runs-on: ubuntu-latest
+    permissions: write-all
     name: Link Sonar Quality Gate into PR
     steps:
       - uses: actions/github-script@v5
