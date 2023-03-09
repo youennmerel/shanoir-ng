@@ -24,10 +24,22 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 11
+    - name: Cache SonarQube packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+    - name: Cache Maven packages
+      uses: actions/cache@v1
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
     - name: Create directory /shanoir-ng-logs
       run: sudo mkdir -m777 /var/log/shanoir-ng-logs
     - name: Build with Maven
-      run: mvn -f ./shanoir-ng-parent/pom.xml install
+      run: mvn -f ./shanoir-ng-parent/pom.xml install verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=youennmerel:shanoir-ng
       env:
         SHANOIR_URL_HOST: localhost
         SHANOIR_URL_SCHEME: http
@@ -35,4 +47,7 @@ jobs:
         SHANOIR_ADMIN_EMAIL: nobody@inria.fr
         SHANOIR_KEYCLOAK_USER: admin
         SHANOIR_KEYCLOAK_PASSWORD: '&a1A&a1A'
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         
