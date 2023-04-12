@@ -12,6 +12,14 @@ import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
 public abstract class OutputProcessing {
 
 	/**
+	 * Return true if the specified pipeline can be processed by this processing
+	 *
+	 * @param pipelineIdentifier
+	 * @return
+	 */
+	public abstract boolean doManage(String pipelineIdentifier);
+
+	/**
 	 * This methods manages the single result of a Carmin  dataset processing
 	 * @param resultFile the result file as tar.gz of the processing
 	 * @param parentFolder the temporary arent folder in which we are currently working

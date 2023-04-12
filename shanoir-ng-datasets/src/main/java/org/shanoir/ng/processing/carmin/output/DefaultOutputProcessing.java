@@ -72,6 +72,11 @@ public class DefaultOutputProcessing extends OutputProcessing {
 	private static final Logger LOG = LoggerFactory.getLogger(DefaultOutputProcessing.class);
 
 	@Override
+	public boolean doManage(String pipelineIdentifier) {
+		return true;
+	}
+
+	@Override
 	public void manageTarGzResult(File in, File parent, CarminDatasetProcessing processing) {
 		try (TarArchiveInputStream fin = new TarArchiveInputStream(
 				new GzipCompressorInputStream(new FileInputStream(in)))) {
