@@ -171,14 +171,6 @@ public class OFSEPSequencesIdentificationOutputProcessing extends OutputProcessi
     private void createDatasetProperties(Dataset ds, JSONObject volume, CarminDatasetProcessing processing) throws JSONException {
         List<DatasetProperty> properties = new ArrayList<>();
 
-        DatasetProcessing dsProcessing = new DatasetProcessing();
-        dsProcessing.setStudyId(ds.getStudyId());
-        dsProcessing.setDatasetProcessingType(processing.getDatasetProcessingType());
-        dsProcessing.setProcessingDate(processing.getProcessingDate());
-        dsProcessing.setInputDatasets(processing.getInputDatasets());
-        dsProcessing.setOutputDatasets(processing.getOutputDatasets());
-        dsProcessing.setComment(processing.getPipelineIdentifier());
-
         for(String name : SERIE_PROPERTIES){
 
             DatasetProperty property = new DatasetProperty();

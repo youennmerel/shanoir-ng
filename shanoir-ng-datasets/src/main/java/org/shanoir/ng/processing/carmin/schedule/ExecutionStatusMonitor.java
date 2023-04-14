@@ -4,12 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.PathMatcher;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-
-import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
 import org.keycloak.representations.AccessTokenResponse;
@@ -22,7 +19,6 @@ import org.shanoir.ng.processing.carmin.service.CarminDatasetProcessingService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.shared.security.KeycloakServiceAccountUtils;
-import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,8 +44,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 
-	private static final String DEFAULT_OUTPUT = "default";
-
 	@Value("${vip.uri}")
 	private String VIP_URI;
 
@@ -74,21 +68,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 	private KeycloakServiceAccountUtils keycloakServiceAccountUtils;
 
 	@Autowired
-	private ObjectMapper mapper;
-
-	@Autowired
-	private DefaultOutputProcessing defaultOutputProcessing;
-	
-	// Map of output methods to execute.
-    private static Map<String, OutputProcessing> outputProcessingMap;
-
-	@PostConstruct
-	public void Initialize() {
-		// Init output map
-        Map<String, OutputProcessing> aMap =  new HashMap<>();
-        aMap.put(DEFAULT_OUTPUT, defaultOutputProcessing);
-        outputProcessingMap = Collections.unmodifiableMap(aMap);
-	}
+	private List<OutputProcessing> outputProcessings;
 
 	@Async
 	@Override
@@ -152,11 +132,17 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 							.getPathMatcher("glob:**/*.{tgz,tar.gz}");
 					final Stream<java.nio.file.Path> stream = Files.list(userImportDir.toPath());
 
-					String outputProcessingKey = StringUtils.isEmpty(carminDatasetProcessing.getOutputProcessing()) ? DEFAULT_OUTPUT : carminDatasetProcessing.getOutputProcessing();
-					
+					OutputProcessing processing = this.getProcessingForPipeline(carminDatasetProcessing.getPipelineIdentifier());
+
+					if(processing == null){
+						LOG.error("No processing found for pipeline [{}].", carminDatasetProcessing.getPipelineIdentifier());
+						stop.set(true);
+						break;
+					}
+
 					stream.filter(matcher::matches)
 					.forEach(zipFile -> {
-						outputProcessingMap.get(outputProcessingKey).manageTarGzResult(zipFile.toFile(), userImportDir.getAbsoluteFile(), carminDatasetProcessing);
+						processing.manageTarGzResult(zipFile.toFile(), userImportDir.getAbsoluteFile(), carminDatasetProcessing);
 					});
 
 					LOG.info("execution status updated, stopping job...");
@@ -207,6 +193,18 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 				stop.set(true);
 			}
 		}
+	}
+
+	private OutputProcessing getProcessingForPipeline(String identifier){
+		OutputProcessing defaultProcessing = null;
+		for(OutputProcessing processing : outputProcessings){
+			if(processing instanceof DefaultOutputProcessing){
+				defaultProcessing = processing;
+			}else if (processing.doManage(identifier)){
+				return processing;
+			}
+		}
+		return defaultProcessing;
 	}
 
 	/**
